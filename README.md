@@ -59,7 +59,7 @@ Check Fly's current free allowance first; it changes.
 
 ```bash
 fly launch --no-deploy --copy-config         # pick a unique app name, then edit fly.toml to match
-fly volumes create daybook_data --size 1
+fly volumes create data --size 1
 fly deploy
 fly ssh console -C "daybook invite you@example.com"
 ```

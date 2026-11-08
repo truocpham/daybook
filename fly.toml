@@ -1,29 +1,37 @@
-# Change `app` to a unique name: the site will be https://<app>.fly.dev
-app = "daybook-CHANGE-ME"
-primary_region = "iad"
+# Fly.io configuration for Daybook (app name and region come from `fly launch`).
+# The site is https://daybook.fly.dev. Builds use the Dockerfile in this folder.
+
+app = 'daybook'
+primary_region = 'ams'
 
 [build]
 
 [env]
-  PORT = "8080"
-  DAYBOOK_DATA = "/data"
-  DAYBOOK_PUBLIC_URL = "https://daybook-CHANGE-ME.fly.dev"
-  # LITESTREAM_REPLICA_URL = "s3://your-bucket/daybook"   # plus the secrets in README.md
+  DAYBOOK_DATA = '/data'
+  DAYBOOK_PUBLIC_URL = 'https://daybook.fly.dev'
+  PORT = '8080'
+  # LITESTREAM_REPLICA_URL = 's3://your-bucket/daybook'   # plus the secrets in README.md
 
-[mounts]
-  source = "daybook_data"
-  destination = "/data"
+# SQLite lives on this volume, so run exactly one machine.
+[[mounts]]
+  source = 'data'
+  destination = '/data'
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
   [[http_service.checks]]
-    method = "GET"
-    path = "/health"
-    interval = "30s"
-    timeout = "5s"
-    grace_period = "10s"
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/health'
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1
