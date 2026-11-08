@@ -1,6 +1,7 @@
 #!/bin/sh
 # Runs the browser tests against a throw-away container. Needs Docker and the image daybook:dev.
 set -e
+cd "$(dirname "$0")"
 NAME=daybook-e2e
 docker rm -f $NAME >/dev/null 2>&1 || true
 docker run -d --name $NAME -e DAYBOOK_PUBLIC_URL=http://localhost:8080 daybook:dev >/dev/null
