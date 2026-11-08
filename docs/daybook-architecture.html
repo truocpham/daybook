@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daybook Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:ital,wght@1,400&display=swap" rel="stylesheet">
+<style>
+:root{--page:#f6f7f9;--page-ink:#1b2430;--page-muted:#5d6b7c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0f141b;--page-ink:#e6ebf2;--page-muted:#93a1b3;color-scheme:dark}}
+:root[data-theme="dark"]{--page:#0f141b;--page-ink:#e6ebf2;--page-muted:#93a1b3;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--page-ink);font:16px/1.5 'IBM Plex Sans',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:32px 20px 48px;gap:12px}
+.eyebrow{font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--page-muted);align-self:center;width:min(1320px,calc(100vw - 40px))}
+h1{font-size:28px;line-height:1.2;margin:0 0 8px;font-weight:600;align-self:center;width:min(1320px,calc(100vw - 40px));text-wrap:balance}
+/* dd:start — diagram-design skin matched to the Daybook plan page */
+.dd{--dd-paper:#ffffff;--dd-node:#ffffff;--dd-ink:#1b2430;--dd-muted:#4a586a;--dd-soft:#5d6b7c;--dd-line:#dde2e9;
+  --dd-accent:#1f6feb;--dd-tint:rgba(31,111,235,.08);--dd-link:#0b7285;--dd-store:#eef1f5;--dd-ext:#f6f7f9;--dd-ext-line:#8793a3;--dd-zone:rgba(27,36,48,.02);--dd-zone2:rgba(27,36,48,.035);--dd-zone-line:rgba(27,36,48,.14);--dd-leader:rgba(27,36,48,.4)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dd{--dd-paper:#171e28;--dd-node:#1d2633;--dd-ink:#e6ebf2;--dd-muted:#aab6c5;--dd-soft:#93a1b3;--dd-line:#273140;
+  --dd-accent:#5b9bff;--dd-tint:rgba(91,155,255,.14);--dd-link:#4fc3d0;--dd-store:#212b3a;--dd-ext:#141a23;--dd-ext-line:#6c7a8c;--dd-zone:rgba(230,235,242,.025);--dd-zone2:rgba(230,235,242,.045);--dd-zone-line:rgba(230,235,242,.16);--dd-leader:rgba(230,235,242,.45)}}
+:root[data-theme="dark"] .dd{--dd-paper:#171e28;--dd-node:#1d2633;--dd-ink:#e6ebf2;--dd-muted:#aab6c5;--dd-soft:#93a1b3;--dd-line:#273140;
+  --dd-accent:#5b9bff;--dd-tint:rgba(91,155,255,.14);--dd-link:#4fc3d0;--dd-store:#212b3a;--dd-ext:#141a23;--dd-ext-line:#6c7a8c;--dd-zone:rgba(230,235,242,.025);--dd-zone2:rgba(230,235,242,.045);--dd-zone-line:rgba(230,235,242,.16);--dd-leader:rgba(230,235,242,.45)}
+.dd{align-self:center;width:min(1320px,calc(100vw - 40px));background:var(--dd-paper);border:1px solid var(--dd-line);border-radius:8px;padding:16px;overflow-x:auto;margin:0}
+.dd svg{width:100%;min-width:1280px;display:block}
+@media print{.dd{overflow-x:visible}.dd svg{min-width:0}}
+.dd .bg{fill:var(--dd-paper)}
+.dd .zone{fill:var(--dd-zone);stroke:var(--dd-zone-line);stroke-width:.8}
+.dd .zone2{fill:var(--dd-zone2);stroke:var(--dd-zone-line);stroke-width:.8}
+.dd .mask{fill:var(--dd-paper)}
+.dd .ey{fill:var(--dd-soft);font-family:'IBM Plex Mono',ui-monospace,monospace}
+.dd .al{fill:var(--dd-soft);font-family:'IBM Plex Mono',ui-monospace,monospace}
+.dd .al-acc{fill:var(--dd-accent)}.dd .al-link{fill:var(--dd-link)}
+.dd .nm{fill:var(--dd-ink);font-family:'IBM Plex Sans',system-ui,sans-serif}
+.dd .sb{fill:var(--dd-muted);font-family:'IBM Plex Mono',ui-monospace,monospace}
+.dd .lg{fill:var(--dd-muted);font-family:'IBM Plex Sans',system-ui,sans-serif}
+.dd .co{fill:var(--dd-ink);font-family:'IBM Plex Serif',Georgia,serif;font-style:italic}
+.dd .box{stroke-width:1}
+.dd .back{color:var(--dd-ink)}.dd .back .box{fill:var(--dd-node);stroke:var(--dd-ink)}
+.dd .store{color:var(--dd-muted)}.dd .store .box{fill:var(--dd-store);stroke:var(--dd-muted)}
+.dd .ext{color:var(--dd-soft)}.dd .ext .box{fill:var(--dd-ext);stroke:var(--dd-ext-line)}
+.dd .focal{color:var(--dd-accent)}.dd .focal .box{fill:var(--dd-tint);stroke:var(--dd-accent)}
+.dd .tag{fill:none;stroke:currentColor;stroke-opacity:.5;stroke-width:.8}
+.dd .tt{fill:currentColor;font-family:'IBM Plex Mono',ui-monospace,monospace}
+.dd .a{fill:none;stroke-width:1.2}
+.dd .a-m{stroke:var(--dd-muted)}.dd .a-acc{stroke:var(--dd-accent);stroke-width:1.4}.dd .a-link{stroke:var(--dd-link)}
+.dd .dash{stroke-dasharray:4,3;stroke-width:1}
+.dd .mk-m{fill:var(--dd-muted)}.dd .mk-acc{fill:var(--dd-accent)}.dd .mk-link{fill:var(--dd-link)}
+.dd .rule{stroke:var(--dd-zone-line);stroke-width:.8}
+.dd .leader{fill:none;stroke:var(--dd-leader);stroke-width:1;stroke-dasharray:4,3}
+.dd .dot{fill:var(--dd-ink)}
+/* dd:end */
+</style>
+</head>
+<body>
+<p class="eyebrow">Architecture · Daybook</p>
+<h1>One Rust binary, one SQLite file</h1>
+<!-- dd:figure:start -->
+<figure class="dd">
+<svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="daybook-architecture-title daybook-architecture-desc">
+<title id="daybook-architecture-title">Daybook architecture</title>
+<desc id="daybook-architecture-desc">Architecture diagram of the installed browser app syncing through three endpoints to one Rust container that stores notes in SQLite and images on a volume, replicated to object storage by Litestream.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk-m" points="0 0, 8 3, 0 6"/></marker>
+<marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk-acc" points="0 0, 8 3, 0 6"/></marker>
+<marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk-link" points="0 0, 8 3, 0 6"/></marker>
+</defs>
+<rect class="bg" width="100%" height="100%"/>
+<!-- Zones (drawn first) -->
+<rect class="zone" x="40" y="72" width="300" height="440" rx="8"/>
+<rect class="mask" x="52" y="76" width="96" height="12" rx="2"/>
+<text class="ey" x="56" y="85" font-size="8" letter-spacing="0.14em">ON YOUR DEVICE</text>
+<rect class="zone" x="520" y="72" width="552" height="440" rx="8"/>
+<rect class="mask" x="532" y="76" width="88" height="12" rx="2"/>
+<text class="ey" x="536" y="85" font-size="8" letter-spacing="0.14em">ONE CONTAINER</text>
+<rect class="zone2" x="856" y="136" width="192" height="228" rx="8"/>
+<rect class="mask" x="868" y="140" width="84" height="12" rx="2"/>
+<text class="ey" x="872" y="149" font-size="8" letter-spacing="0.14em">VOLUME /DATA</text>
+<!-- Arrows (behind boxes) -->
+<line class="a a-m dash" x1="190" y1="168" x2="190" y2="232" marker-end="url(#arrow)"/>
+<line class="a a-m" x1="190" y1="344" x2="190" y2="408" marker-end="url(#arrow)"/>
+<line class="a a-acc" x1="316" y1="260" x2="560" y2="260" marker-end="url(#arrow-accent)"/>
+<line class="a a-link" x1="316" y1="288" x2="560" y2="288" marker-end="url(#arrow-link)"/>
+<line class="a a-link" x1="316" y1="316" x2="560" y2="316" marker-end="url(#arrow-link)"/>
+<path class="a a-m" d="M 768,268 H 816 Q 824,268 824,260 V 208 Q 824,200 832,200 H 880" marker-end="url(#arrow)"/>
+<line class="a a-m" x1="768" y1="308" x2="880" y2="308" marker-end="url(#arrow)"/>
+<line class="a a-m" x1="952" y1="340" x2="952" y2="424" marker-end="url(#arrow)"/>
+<line class="a a-link" x1="1024" y1="456" x2="1112" y2="456" marker-end="url(#arrow-link)"/>
+<!-- Arrow labels -->
+<rect class="mask" x="198" y="194" width="76" height="12" rx="2"/>
+<text class="al " x="236" y="203" font-size="8" text-anchor="middle" letter-spacing="0.06em">SERVES SHELL</text>
+<rect class="mask" x="198" y="370" width="68" height="12" rx="2"/>
+<text class="al " x="232" y="379" font-size="8" text-anchor="middle" letter-spacing="0.06em">LOCAL WRITE</text>
+<rect class="mask" x="396" y="242" width="84" height="12" rx="2"/>
+<text class="al al-acc" x="438" y="251" font-size="8" text-anchor="middle" letter-spacing="0.06em">POST /API/SYNC</text>
+<rect class="mask" x="406" y="270" width="64" height="12" rx="2"/>
+<text class="al al-link" x="438" y="279" font-size="8" text-anchor="middle" letter-spacing="0.06em">/API/LOGIN</text>
+<rect class="mask" x="404" y="298" width="68" height="12" rx="2"/>
+<text class="al al-link" x="438" y="307" font-size="8" text-anchor="middle" letter-spacing="0.06em">/FILES/:SHA</text>
+<rect class="mask" x="780" y="228" width="36" height="12" rx="2"/>
+<text class="al " x="798" y="237" font-size="8" text-anchor="middle" letter-spacing="0.06em">BLOBS</text>
+<rect class="mask" x="808" y="290" width="24" height="12" rx="2"/>
+<text class="al " x="820" y="299" font-size="8" text-anchor="middle" letter-spacing="0.06em">SQL</text>
+<rect class="mask" x="960" y="376" width="64" height="12" rx="2"/>
+<text class="al " x="992" y="385" font-size="8" text-anchor="middle" letter-spacing="0.06em">WAL STREAM</text>
+<rect class="mask" x="1038" y="438" width="60" height="12" rx="2"/>
+<text class="al al-link" x="1068" y="447" font-size="8" text-anchor="middle" letter-spacing="0.06em">REPLICATE</text>
+<!-- Nodes -->
+<g class="back">
+<rect class="mask" x="64" y="104" width="252" height="64" rx="6"/>
+<rect class="box" x="64" y="104" width="252" height="64" rx="6"/>
+<rect class="tag" x="72" y="112" width="28" height="12" rx="2"/>
+<text class="tt" x="86" y="121" font-size="7" text-anchor="middle" letter-spacing="0.08em">PWA</text>
+<text class="nm" x="190" y="140" font-size="12" font-weight="600" text-anchor="middle">Service worker</text>
+<text class="sb" x="190" y="156" font-size="9" text-anchor="middle">offline app shell</text>
+</g>
+<g class="back">
+<rect class="mask" x="64" y="232" width="252" height="112" rx="6"/>
+<rect class="box" x="64" y="232" width="252" height="112" rx="6"/>
+<rect class="tag" x="72" y="240" width="28" height="12" rx="2"/>
+<text class="tt" x="86" y="249" font-size="7" text-anchor="middle" letter-spacing="0.08em">UI</text>
+<text class="nm" x="190" y="292" font-size="12" font-weight="600" text-anchor="middle">Web app</text>
+<text class="sb" x="190" y="308" font-size="9" text-anchor="middle">React + TipTap</text>
+</g>
+<g class="store">
+<rect class="mask" x="64" y="408" width="252" height="80" rx="6"/>
+<rect class="box" x="64" y="408" width="252" height="80" rx="6"/>
+<rect class="tag" x="72" y="416" width="36" height="12" rx="2"/>
+<text class="tt" x="90" y="425" font-size="7" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+<text class="nm" x="190" y="452" font-size="12" font-weight="600" text-anchor="middle">IndexedDB</text>
+<text class="sb" x="190" y="468" font-size="9" text-anchor="middle">Dexie · pages · outbox · images</text>
+</g>
+<g class="focal">
+<rect class="mask" x="560" y="232" width="208" height="112" rx="6"/>
+<rect class="box" x="560" y="232" width="208" height="112" rx="6"/>
+<rect class="tag" x="568" y="240" width="28" height="12" rx="2"/>
+<text class="tt" x="582" y="249" font-size="7" text-anchor="middle" letter-spacing="0.08em">BIN</text>
+<text class="nm" x="664" y="286" font-size="12" font-weight="600" text-anchor="middle">daybook</text>
+<text class="sb" x="664" y="302" font-size="9" text-anchor="middle">Rust · axum · rust-embed</text>
+<text class="sb" x="664" y="316" font-size="9" text-anchor="middle">serves app + API</text>
+</g>
+<g class="store">
+<rect class="mask" x="880" y="168" width="144" height="64" rx="6"/>
+<rect class="box" x="880" y="168" width="144" height="64" rx="6"/>
+<rect class="tag" x="888" y="176" width="32" height="12" rx="2"/>
+<text class="tt" x="904" y="185" font-size="7" text-anchor="middle" letter-spacing="0.08em">DISK</text>
+<text class="nm" x="952" y="204" font-size="12" font-weight="600" text-anchor="middle">files/</text>
+<text class="sb" x="952" y="220" font-size="9" text-anchor="middle">sha256 blobs</text>
+</g>
+<g class="store">
+<rect class="mask" x="880" y="276" width="144" height="64" rx="6"/>
+<rect class="box" x="880" y="276" width="144" height="64" rx="6"/>
+<rect class="tag" x="888" y="284" width="24" height="12" rx="2"/>
+<text class="tt" x="900" y="293" font-size="7" text-anchor="middle" letter-spacing="0.08em">DB</text>
+<text class="nm" x="952" y="312" font-size="12" font-weight="600" text-anchor="middle">SQLite</text>
+<text class="sb" x="952" y="328" font-size="9" text-anchor="middle">WAL · FTS5</text>
+</g>
+<g class="back">
+<rect class="mask" x="880" y="424" width="144" height="64" rx="6"/>
+<rect class="box" x="880" y="424" width="144" height="64" rx="6"/>
+<rect class="tag" x="888" y="432" width="32" height="12" rx="2"/>
+<text class="tt" x="904" y="441" font-size="7" text-anchor="middle" letter-spacing="0.08em">PROC</text>
+<text class="nm" x="952" y="460" font-size="12" font-weight="600" text-anchor="middle">Litestream</text>
+<text class="sb" x="952" y="476" font-size="9" text-anchor="middle">WAL replication</text>
+</g>
+<g class="ext">
+<rect class="mask" x="1112" y="424" width="128" height="64" rx="6"/>
+<rect class="box" x="1112" y="424" width="128" height="64" rx="6"/>
+<rect class="tag" x="1120" y="432" width="28" height="12" rx="2"/>
+<text class="tt" x="1134" y="441" font-size="7" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+<text class="nm" x="1176" y="460" font-size="12" font-weight="600" text-anchor="middle">Object storage</text>
+<text class="sb" x="1176" y="476" font-size="9" text-anchor="middle">S3-compatible</text>
+</g>
+<!-- Callout -->
+<text class="co" x="40" y="584" font-size="14">Every edit saves locally first. Sync runs behind it.</text>
+<path class="leader" d="M 150,568 Q 150,520 190,488"/>
+<circle class="dot" cx="190" cy="488" r="2"/>
+<!-- Legend strip -->
+<line class="rule" x1="40" y1="632" x2="1240" y2="632"/>
+<text class="ey" x="40" y="650" font-size="8" letter-spacing="0.18em">LEGEND</text>
+<g class="focal"><rect class="box" x="40" y="662" width="14" height="10" rx="2"/></g>
+<text class="lg" x="60" y="671" font-size="8.5">Focal binary</text>
+<g class="back"><rect class="box" x="190" y="662" width="14" height="10" rx="2"/></g>
+<text class="lg" x="210" y="671" font-size="8.5">Component</text>
+<g class="store"><rect class="box" x="330" y="662" width="14" height="10" rx="2"/></g>
+<text class="lg" x="350" y="671" font-size="8.5">Store</text>
+<g class="ext"><rect class="box" x="420" y="662" width="14" height="10" rx="2"/></g>
+<text class="lg" x="440" y="671" font-size="8.5">External</text>
+<line class="a a-acc " x1="560" y1="667" x2="588" y2="667" marker-end="url(#arrow-accent)"/>
+<text class="lg" x="596" y="671" font-size="8.5">Primary sync</text>
+<line class="a a-link " x1="700" y1="667" x2="728" y2="667" marker-end="url(#arrow-link)"/>
+<text class="lg" x="736" y="671" font-size="8.5">HTTP request</text>
+<line class="a a-m " x1="850" y1="667" x2="878" y2="667" marker-end="url(#arrow)"/>
+<text class="lg" x="886" y="671" font-size="8.5">Internal write</text>
+<line class="a a-m dash" x1="1000" y1="667" x2="1028" y2="667" marker-end="url(#arrow)"/>
+<text class="lg" x="1036" y="671" font-size="8.5">Served from cache</text>
+</svg>
+</figure>
+<!-- dd:figure:end -->
+</body>
+</html>

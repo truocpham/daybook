@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daybook Build Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:ital,wght@1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: single readable column, phase cards with a status rail, tables for decisions and data model. */
+:root{
+  --bg:#f6f7f9;--surface:#ffffff;--ink:#1b2430;--muted:#5d6b7c;--line:#dde2e9;--accent:#1f6feb;--accent-soft:#e6efff;--warn:#b45309;--warn-soft:#fff3e0;
+  --font-body:"IBM Plex Sans",system-ui,sans-serif;--font-mono:"IBM Plex Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f141b;--surface:#171e28;--ink:#e6ebf2;--muted:#93a1b3;--line:#273140;--accent:#5b9bff;--accent-soft:#16253d;--warn:#f0a85a;--warn-soft:#2c2112;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f141b;--surface:#171e28;--ink:#e6ebf2;--muted:#93a1b3;--line:#273140;--accent:#5b9bff;--accent-soft:#16253d;--warn:#f0a85a;--warn-soft:#2c2112;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--font-body)}
+.wrap{max-width:860px;margin:0 auto;padding:32px 20px 64px;display:flex;flex-direction:column;gap:28px}
+h1{font-size:30px;line-height:1.2;margin:0;text-wrap:balance}
+h2{font-size:20px;margin:0 0 12px;text-wrap:balance}
+h3{font-size:16px;margin:0}
+p{margin:0}
+.lede{color:var(--muted);max-width:65ch;margin-top:8px}
+section{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.scroll{overflow-x:auto}
+code,pre{font-family:var(--font-mono);font-size:13px}
+pre{margin:0;padding:14px;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow-x:auto;line-height:1.5}
+.phase{display:grid;grid-template-columns:56px 1fr;gap:14px}
+.num{font:500 13px var(--font-mono);color:var(--accent);background:var(--accent-soft);border-radius:6px;height:fit-content;text-align:center;padding:6px 0}
+.phase ul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.risk{background:var(--warn-soft);border-color:transparent}
+.risk b{color:var(--warn)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile b{display:block;font-size:13px;color:var(--muted);font-weight:500}
+.cmp td:first-child{white-space:nowrap}
+.cmp td:nth-child(2){color:var(--muted)}
+/* dd:start — diagram-design skin matched to the Daybook plan page */
+.dd{--dd-paper:#ffffff;--dd-node:#ffffff;--dd-ink:#1b2430;--dd-muted:#4a586a;--dd-soft:#5d6b7c;--dd-line:#dde2e9;
+  --dd-accent:#1f6feb;--dd-tint:rgba(31,111,235,.08);--dd-link:#0b7285;--dd-store:#eef1f5;--dd-ext:#f6f7f9;--dd-ext-line:#8793a3;--dd-zone:rgba(27,36,48,.02);--dd-zone2:rgba(27,36,48,.035);--dd-zone-line:rgba(27,36,48,.14);--dd-leader:rgba(27,36,48,.4)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dd{--dd-paper:#171e28;--dd-node:#1d2633;--dd-ink:#e6ebf2;--dd-muted:#aab6c5;--dd-soft:#93a1b3;--dd-line:#273140;
+  --dd-accent:#5b9bff;--dd-tint:rgba(91,155,255,.14);--dd-link:#4fc3d0;--dd-store:#212b3a;--dd-ext:#141a23;--dd-ext-line:#6c7a8c;--dd-zone:rgba(230,235,242,.025);--dd-zone2:rgba(230,235,242,.045);--dd-zone-line:rgba(230,235,242,.16);--dd-leader:rgba(230,235,242,.45)}}
+:root[data-theme="dark"] .dd{--dd-paper:#171e28;--dd-node:#1d2633;--dd-ink:#e6ebf2;--dd-muted:#aab6c5;--dd-soft:#93a1b3;--dd-line:#273140;
+  --dd-accent:#5b9bff;--dd-tint:rgba(91,155,255,.14);--dd-link:#4fc3d0;--dd-store:#212b3a;--dd-ext:#141a23;--dd-ext-line:#6c7a8c;--dd-zone:rgba(230,235,242,.025);--dd-zone2:rgba(230,235,242,.045);--dd-zone-line:rgba(230,235,242,.16);--dd-leader:rgba(230,235,242,.45)}
+.dd{align-self:center;width:min(1320px,calc(100vw - 40px));background:var(--dd-paper);border:1px solid var(--dd-line);border-radius:8px;padding:16px;overflow-x:auto;margin:0}
+.dd svg{width:100%;min-width:1280px;display:block}
+@media print{.dd{overflow-x:visible}.dd svg{min-width:0}}
+.dd .bg{fill:var(--dd-paper)}
+.dd .zone{fill:var(--dd-zone);stroke:var(--dd-zone-line);stroke-width:.8}
+.dd .zone2{fill:var(--dd-zone2);stroke:var(--dd-zone-line);stroke-width:.8}
+.dd .mask{fill:var(--dd-paper)}
+.dd .ey{fill:var(--dd-soft);font-family:'IBM Plex Mono',ui-monospace,monospace}
+.dd .al{fill:var(--dd-soft);font-family:'IBM Plex Mono',ui-monospace,monospace}
+.dd .al-acc{fill:var(--dd-accent)}.dd .al-link{fill:var(--dd-link)}
+.dd .nm{fill:var(--dd-ink);font-family:'IBM Plex Sans',system-ui,sans-serif}
+.dd .sb{fill:var(--dd-muted);font-family:'IBM Plex Mono',ui-monospace,monospace}
+.dd .lg{fill:var(--dd-muted);font-family:'IBM Plex Sans',system-ui,sans-serif}
+.dd .co{fill:var(--dd-ink);font-family:'IBM Plex Serif',Georgia,serif;font-style:italic}
+.dd .box{stroke-width:1}
+.dd .back{color:var(--dd-ink)}.dd .back .box{fill:var(--dd-node);stroke:var(--dd-ink)}
+.dd .store{color:var(--dd-muted)}.dd .store .box{fill:var(--dd-store);stroke:var(--dd-muted)}
+.dd .ext{color:var(--dd-soft)}.dd .ext .box{fill:var(--dd-ext);stroke:var(--dd-ext-line)}
+.dd .focal{color:var(--dd-accent)}.dd .focal .box{fill:var(--dd-tint);stroke:var(--dd-accent)}
+.dd .tag{fill:none;stroke:currentColor;stroke-opacity:.5;stroke-width:.8}
+.dd .tt{fill:currentColor;font-family:'IBM Plex Mono',ui-monospace,monospace}
+.dd .a{fill:none;stroke-width:1.2}
+.dd .a-m{stroke:var(--dd-muted)}.dd .a-acc{stroke:var(--dd-accent);stroke-width:1.4}.dd .a-link{stroke:var(--dd-link)}
+.dd .dash{stroke-dasharray:4,3;stroke-width:1}
+.dd .mk-m{fill:var(--dd-muted)}.dd .mk-acc{fill:var(--dd-accent)}.dd .mk-link{fill:var(--dd-link)}
+.dd .rule{stroke:var(--dd-zone-line);stroke-width:.8}
+.dd .leader{fill:none;stroke:var(--dd-leader);stroke-width:1;stroke-dasharray:4,3}
+.dd .dot{fill:var(--dd-ink)}
+/* dd:end */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Daybook build plan</h1>
+  <p class="lede">Daybook is a Notion-style daily note app that works offline, syncs across your devices, and installs on desktop and phone. Revision 2 replaces Supabase and Postgres with one Rust binary and one SQLite file.</p>
+</header>
+
+<section>
+  <h2>What changed and why</h2>
+  <div class="card scroll">
+    <table class="cmp">
+      <thead><tr><th>Area</th><th>Before</th><th>Now</th></tr></thead>
+      <tbody>
+        <tr><td>Backend</td><td>Supabase (hosted Postgres, Auth, Storage)</td><td>One Rust binary (axum) that serves the API and the web app</td></tr>
+        <tr><td>Database</td><td>Postgres with row-level security</td><td>One SQLite file in WAL mode, every query filtered by owner</td></tr>
+        <tr><td>Hosting</td><td>Cloudflare Pages plus Supabase, two services</td><td>One small container with one disk volume</td></tr>
+        <tr><td>Login</td><td>Magic link by email</td><td>Email and password (argon2), invites created by a command line tool. No email service</td></tr>
+        <tr><td>Sync API</td><td>Table REST calls plus a client sync loop</td><td>One endpoint, <code>POST /api/sync</code>, push and pull in a single round trip</td></tr>
+        <tr><td>Sync cursor</td><td>Device clock <code>updated_at</code></td><td>Server counter <code>seq</code>, so clock skew cannot break ordering</td></tr>
+        <tr><td>Images</td><td>Supabase Storage bucket and signed URLs</td><td>Files on the volume named by their SHA-256, served by the same binary</td></tr>
+        <tr><td>Search</td><td>Worker index in the browser</td><td>SQLite FTS5 on the server, plus a title filter that works offline</td></tr>
+        <tr><td>Backup</td><td>Supabase backups</td><td>Litestream streams the SQLite file to object storage</td></tr>
+        <tr><td>Databases view</td><td>Table, board, calendar</td><td>Table first. Board and calendar only if you still want them later</td></tr>
+        <tr><td>Desktop wrapper</td><td>Tauri later</td><td>Dropped from the plan. The installed web app covers desktop</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lede">Rust will not make this app feel faster by itself. Typing and rendering happen in the browser, and a notes sync is a few kilobytes. The real speed comes from local-first storage, so every edit lands in IndexedDB instantly and sync runs behind it. Rust still fits well here because it ships as one small static binary with low memory use.</p>
+</section>
+
+<section>
+  <h2>Decisions</h2>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>Topic</th><th>Decision</th><th>Consequence</th></tr></thead>
+      <tbody>
+        <tr><td>Devices</td><td>Desktop browser, phone, often offline</td><td>Installable web app, responsive layout, local-first storage</td></tr>
+        <tr><td>Frontend</td><td>React, TipTap, Vite, TypeScript</td><td>Rich text, drag handles and tables come from TipTap extensions</td></tr>
+        <tr><td>Backend</td><td>Rust, axum, rusqlite</td><td>Single binary, embeds the built web app with rust-embed</td></tr>
+        <tr><td>Sync</td><td>Last write wins per page</td><td>Pages are the sync unit, no CRDT. Overwritten versions go to history</td></tr>
+        <tr><td>Users</td><td>You plus a few invited people</td><td>Public sign-up does not exist. <code>daybook invite name@example.com</code> creates an account</td></tr>
+        <tr><td>Hosting</td><td>Free subdomain</td><td>A <code>fly.dev</code> subdomain on a Fly.io app with a small volume. Check current free allowance before deploy</td></tr>
+        <tr><td>Old notes</td><td>Start fresh</td><td>No importer. The prototype is discarded</td></tr>
+        <tr><td>Features</td><td>Rich text, drag to reorder, databases, images and files</td><td>Phases 2, 6 and 7</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lede">Cloudflare Pages no longer fits, because SQLite needs a persistent disk and the server must run all the time. A free <code>fly.dev</code> name replaces it. A home machine behind a Cloudflare Tunnel is the other option.</p>
+</section>
+
+<section>
+  <h2>Architecture</h2>
+  <!-- dd:figure:start -->
+<figure class="dd">
+<svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="daybook-architecture-title daybook-architecture-desc">
+<title id="daybook-architecture-title">Daybook architecture</title>
+<desc id="daybook-architecture-desc">Architecture diagram of the installed browser app syncing through three endpoints to one Rust container that stores notes in SQLite and images on a volume, replicated to object storage by Litestream.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk-m" points="0 0, 8 3, 0 6"/></marker>
+<marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk-acc" points="0 0, 8 3, 0 6"/></marker>
+<marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk-link" points="0 0, 8 3, 0 6"/></marker>
+</defs>
+<rect class="bg" width="100%" height="100%"/>
+<!-- Zones (drawn first) -->
+<rect class="zone" x="40" y="72" width="300" height="440" rx="8"/>
+<rect class="mask" x="52" y="76" width="96" height="12" rx="2"/>
+<text class="ey" x="56" y="85" font-size="8" letter-spacing="0.14em">ON YOUR DEVICE</text>
+<rect class="zone" x="520" y="72" width="552" height="440" rx="8"/>
+<rect class="mask" x="532" y="76" width="88" height="12" rx="2"/>
+<text class="ey" x="536" y="85" font-size="8" letter-spacing="0.14em">ONE CONTAINER</text>
+<rect class="zone2" x="856" y="136" width="192" height="228" rx="8"/>
+<rect class="mask" x="868" y="140" width="84" height="12" rx="2"/>
+<text class="ey" x="872" y="149" font-size="8" letter-spacing="0.14em">VOLUME /DATA</text>
+<!-- Arrows (behind boxes) -->
+<line class="a a-m dash" x1="190" y1="168" x2="190" y2="232" marker-end="url(#arrow)"/>
+<line class="a a-m" x1="190" y1="344" x2="190" y2="408" marker-end="url(#arrow)"/>
+<line class="a a-acc" x1="316" y1="260" x2="560" y2="260" marker-end="url(#arrow-accent)"/>
+<line class="a a-link" x1="316" y1="288" x2="560" y2="288" marker-end="url(#arrow-link)"/>
+<line class="a a-link" x1="316" y1="316" x2="560" y2="316" marker-end="url(#arrow-link)"/>
+<path class="a a-m" d="M 768,268 H 816 Q 824,268 824,260 V 208 Q 824,200 832,200 H 880" marker-end="url(#arrow)"/>
+<line class="a a-m" x1="768" y1="308" x2="880" y2="308" marker-end="url(#arrow)"/>
+<line class="a a-m" x1="952" y1="340" x2="952" y2="424" marker-end="url(#arrow)"/>
+<line class="a a-link" x1="1024" y1="456" x2="1112" y2="456" marker-end="url(#arrow-link)"/>
+<!-- Arrow labels -->
+<rect class="mask" x="198" y="194" width="76" height="12" rx="2"/>
+<text class="al " x="236" y="203" font-size="8" text-anchor="middle" letter-spacing="0.06em">SERVES SHELL</text>
+<rect class="mask" x="198" y="370" width="68" height="12" rx="2"/>
+<text class="al " x="232" y="379" font-size="8" text-anchor="middle" letter-spacing="0.06em">LOCAL WRITE</text>
+<rect class="mask" x="396" y="242" width="84" height="12" rx="2"/>
+<text class="al al-acc" x="438" y="251" font-size="8" text-anchor="middle" letter-spacing="0.06em">POST /API/SYNC</text>
+<rect class="mask" x="406" y="270" width="64" height="12" rx="2"/>
+<text class="al al-link" x="438" y="279" font-size="8" text-anchor="middle" letter-spacing="0.06em">/API/LOGIN</text>
+<rect class="mask" x="404" y="298" width="68" height="12" rx="2"/>
+<text class="al al-link" x="438" y="307" font-size="8" text-anchor="middle" letter-spacing="0.06em">/FILES/:SHA</text>
+<rect class="mask" x="780" y="228" width="36" height="12" rx="2"/>
+<text class="al " x="798" y="237" font-size="8" text-anchor="middle" letter-spacing="0.06em">BLOBS</text>
+<rect class="mask" x="808" y="290" width="24" height="12" rx="2"/>
+<text class="al " x="820" y="299" font-size="8" text-anchor="middle" letter-spacing="0.06em">SQL</text>
+<rect class="mask" x="960" y="376" width="64" height="12" rx="2"/>
+<text class="al " x="992" y="385" font-size="8" text-anchor="middle" letter-spacing="0.06em">WAL STREAM</text>
+<rect class="mask" x="1038" y="438" width="60" height="12" rx="2"/>
+<text class="al al-link" x="1068" y="447" font-size="8" text-anchor="middle" letter-spacing="0.06em">REPLICATE</text>
+<!-- Nodes -->
+<g class="back">
+<rect class="mask" x="64" y="104" width="252" height="64" rx="6"/>
+<rect class="box" x="64" y="104" width="252" height="64" rx="6"/>
+<rect class="tag" x="72" y="112" width="28" height="12" rx="2"/>
+<text class="tt" x="86" y="121" font-size="7" text-anchor="middle" letter-spacing="0.08em">PWA</text>
+<text class="nm" x="190" y="140" font-size="12" font-weight="600" text-anchor="middle">Service worker</text>
+<text class="sb" x="190" y="156" font-size="9" text-anchor="middle">offline app shell</text>
+</g>
+<g class="back">
+<rect class="mask" x="64" y="232" width="252" height="112" rx="6"/>
+<rect class="box" x="64" y="232" width="252" height="112" rx="6"/>
+<rect class="tag" x="72" y="240" width="28" height="12" rx="2"/>
+<text class="tt" x="86" y="249" font-size="7" text-anchor="middle" letter-spacing="0.08em">UI</text>
+<text class="nm" x="190" y="292" font-size="12" font-weight="600" text-anchor="middle">Web app</text>
+<text class="sb" x="190" y="308" font-size="9" text-anchor="middle">React + TipTap</text>
+</g>
+<g class="store">
+<rect class="mask" x="64" y="408" width="252" height="80" rx="6"/>
+<rect class="box" x="64" y="408" width="252" height="80" rx="6"/>
+<rect class="tag" x="72" y="416" width="36" height="12" rx="2"/>
+<text class="tt" x="90" y="425" font-size="7" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+<text class="nm" x="190" y="452" font-size="12" font-weight="600" text-anchor="middle">IndexedDB</text>
+<text class="sb" x="190" y="468" font-size="9" text-anchor="middle">Dexie · pages · outbox · images</text>
+</g>
+<g class="focal">
+<rect class="mask" x="560" y="232" width="208" height="112" rx="6"/>
+<rect class="box" x="560" y="232" width="208" height="112" rx="6"/>
+<rect class="tag" x="568" y="240" width="28" height="12" rx="2"/>
+<text class="tt" x="582" y="249" font-size="7" text-anchor="middle" letter-spacing="0.08em">BIN</text>
+<text class="nm" x="664" y="286" font-size="12" font-weight="600" text-anchor="middle">daybook</text>
+<text class="sb" x="664" y="302" font-size="9" text-anchor="middle">Rust · axum · rust-embed</text>
+<text class="sb" x="664" y="316" font-size="9" text-anchor="middle">serves app + API</text>
+</g>
+<g class="store">
+<rect class="mask" x="880" y="168" width="144" height="64" rx="6"/>
+<rect class="box" x="880" y="168" width="144" height="64" rx="6"/>
+<rect class="tag" x="888" y="176" width="32" height="12" rx="2"/>
+<text class="tt" x="904" y="185" font-size="7" text-anchor="middle" letter-spacing="0.08em">DISK</text>
+<text class="nm" x="952" y="204" font-size="12" font-weight="600" text-anchor="middle">files/</text>
+<text class="sb" x="952" y="220" font-size="9" text-anchor="middle">sha256 blobs</text>
+</g>
+<g class="store">
+<rect class="mask" x="880" y="276" width="144" height="64" rx="6"/>
+<rect class="box" x="880" y="276" width="144" height="64" rx="6"/>
+<rect class="tag" x="888" y="284" width="24" height="12" rx="2"/>
+<text class="tt" x="900" y="293" font-size="7" text-anchor="middle" letter-spacing="0.08em">DB</text>
+<text class="nm" x="952" y="312" font-size="12" font-weight="600" text-anchor="middle">SQLite</text>
+<text class="sb" x="952" y="328" font-size="9" text-anchor="middle">WAL · FTS5</text>
+</g>
+<g class="back">
+<rect class="mask" x="880" y="424" width="144" height="64" rx="6"/>
+<rect class="box" x="880" y="424" width="144" height="64" rx="6"/>
+<rect class="tag" x="888" y="432" width="32" height="12" rx="2"/>
+<text class="tt" x="904" y="441" font-size="7" text-anchor="middle" letter-spacing="0.08em">PROC</text>
+<text class="nm" x="952" y="460" font-size="12" font-weight="600" text-anchor="middle">Litestream</text>
+<text class="sb" x="952" y="476" font-size="9" text-anchor="middle">WAL replication</text>
+</g>
+<g class="ext">
+<rect class="mask" x="1112" y="424" width="128" height="64" rx="6"/>
+<rect class="box" x="1112" y="424" width="128" height="64" rx="6"/>
+<rect class="tag" x="1120" y="432" width="28" height="12" rx="2"/>
+<text class="tt" x="1134" y="441" font-size="7" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+<text class="nm" x="1176" y="460" font-size="12" font-weight="600" text-anchor="middle">Object storage</text>
+<text class="sb" x="1176" y="476" font-size="9" text-anchor="middle">S3-compatible</text>
+</g>
+<!-- Callout -->
+<text class="co" x="40" y="584" font-size="14">Every edit saves locally first. Sync runs behind it.</text>
+<path class="leader" d="M 150,568 Q 150,520 190,488"/>
+<circle class="dot" cx="190" cy="488" r="2"/>
+<!-- Legend strip -->
+<line class="rule" x1="40" y1="632" x2="1240" y2="632"/>
+<text class="ey" x="40" y="650" font-size="8" letter-spacing="0.18em">LEGEND</text>
+<g class="focal"><rect class="box" x="40" y="662" width="14" height="10" rx="2"/></g>
+<text class="lg" x="60" y="671" font-size="8.5">Focal binary</text>
+<g class="back"><rect class="box" x="190" y="662" width="14" height="10" rx="2"/></g>
+<text class="lg" x="210" y="671" font-size="8.5">Component</text>
+<g class="store"><rect class="box" x="330" y="662" width="14" height="10" rx="2"/></g>
+<text class="lg" x="350" y="671" font-size="8.5">Store</text>
+<g class="ext"><rect class="box" x="420" y="662" width="14" height="10" rx="2"/></g>
+<text class="lg" x="440" y="671" font-size="8.5">External</text>
+<line class="a a-acc " x1="560" y1="667" x2="588" y2="667" marker-end="url(#arrow-accent)"/>
+<text class="lg" x="596" y="671" font-size="8.5">Primary sync</text>
+<line class="a a-link " x1="700" y1="667" x2="728" y2="667" marker-end="url(#arrow-link)"/>
+<text class="lg" x="736" y="671" font-size="8.5">HTTP request</text>
+<line class="a a-m " x1="850" y1="667" x2="878" y2="667" marker-end="url(#arrow)"/>
+<text class="lg" x="886" y="671" font-size="8.5">Internal write</text>
+<line class="a a-m dash" x1="1000" y1="667" x2="1028" y2="667" marker-end="url(#arrow)"/>
+<text class="lg" x="1036" y="671" font-size="8.5">Served from cache</text>
+</svg>
+</figure>
+<!-- dd:figure:end -->
+</section>
+
+<section>
+  <h2>Starting point</h2>
+  <div class="tiles">
+    <div class="card tile"><b>Prototype</b>3 files, no dependencies</div>
+    <div class="card tile"><b>Storage</b>localStorage only</div>
+    <div class="card tile"><b>Blocks</b>8 types, plain text</div>
+    <div class="card tile"><b>Verified</b>syntax check only</div>
+  </div>
+  <p class="lede">The prototype in <code>index.html</code>, <code>style.css</code> and <code>app.js</code> stays as the behavior reference until phase 3 reaches parity. Then it is deleted. Its notes are not imported.</p>
+</section>
+
+<section>
+  <h2>Phases</h2>
+
+  <div class="card phase"><div class="num">P1</div><div>
+    <h3>Rust server skeleton</h3>
+    <ul>
+      <li>Cargo project with axum, rusqlite (bundled SQLite), tokio, serde, tracing.</li>
+      <li>One connection for writes and a small pool for reads, WAL mode, <code>busy_timeout</code> set. Migrations as numbered SQL files run at start.</li>
+      <li>Config from environment: data directory, port, session secret.</li>
+      <li>Serves a placeholder page and <code>GET /health</code>.</li>
+    </ul>
+    <div class="meta"><span class="pill">Done when: <code>cargo run</code> serves a page and creates the database file</span></div>
+  </div></div>
+
+  <div class="card phase"><div class="num">P2</div><div>
+    <h3>Web app and editor</h3>
+    <ul>
+      <li>Vite, React and TypeScript project in <code>web/</code>. The dev server proxies <code>/api</code> to the Rust server.</li>
+      <li>Local database in IndexedDB through Dexie.</li>
+      <li>TipTap with StarterKit, task list, links, slash menu and a drag handle on every block. Documents stored as TipTap JSON.</li>
+    </ul>
+    <div class="meta"><span class="pill">Done when: every prototype block works, plus formatting and drag, and notes survive a reload</span></div>
+  </div></div>
+
+  <div class="card phase"><div class="num">P3</div><div>
+    <h3>Pages and daily notes</h3>
+    <ul>
+      <li>Nested page tree with drag to reorder and move. Order is a fractional index string, so a move touches one row.</li>
+      <li>Today button, previous and next day, template for new daily notes.</li>
+      <li>Title filter over the local pages. Full-text search arrives with sync.</li>
+      <li>Trash with restore.</li>
+    </ul>
+    <div class="meta"><span class="pill">Done when: prototype parity reached, then delete the prototype</span></div>
+  </div></div>
+
+  <div class="card phase"><div class="num">P4</div><div>
+    <h3>Accounts and sync</h3>
+    <ul>
+      <li><code>daybook invite &lt;email&gt;</code> prints a one-time set-password link. There is no sign-up page.</li>
+      <li>Login with argon2 password check, then an HttpOnly, Secure, SameSite cookie holding a random session id stored in SQLite.</li>
+      <li><code>POST /api/sync</code> takes <code>{ cursor, changes[] }</code>. In one transaction the server applies each change, assigns it the next <code>seq</code>, then returns every row with <code>seq</code> above the cursor.</li>
+      <li>Conflict rule: the change that arrives last wins. The version it replaces is copied to <code>page_history</code>.</li>
+      <li>Client keeps a <code>dirty</code> flag per local row. Sync runs on start, on reconnect, on focus, and a moment after typing stops.</li>
+      <li>FTS5 index updated in the same transaction. <code>GET /api/search</code> exposes it.</li>
+    </ul>
+    <div class="meta"><span class="pill">Done when: edit offline on two devices, reconnect, both converge, and a second account sees nothing of the first</span></div>
+  </div></div>
+
+  <div class="card phase"><div class="num">P5</div><div>
+    <h3>Installable app and mobile layout</h3>
+    <ul>
+      <li>vite-plugin-pwa: manifest, icons, service worker that caches the app shell.</li>
+      <li>Sidebar becomes a drawer under 700px. Touch-sized controls. Safe-area padding.</li>
+      <li>Offline indicator and a version check that reloads when a new build is available.</li>
+    </ul>
+    <div class="meta"><span class="pill">Done when: installs on a phone, opens and edits in airplane mode</span></div>
+  </div></div>
+
+  <div class="card phase"><div class="num">P6</div><div>
+    <h3>Images and files</h3>
+    <ul>
+      <li>Paste, drop, or pick an image. Resize to a maximum edge before storing.</li>
+      <li>Blob goes to IndexedDB first, then <code>PUT /files/:sha256</code> when online. The server writes it to the volume and refuses a hash mismatch.</li>
+      <li>Same hash, same file, so duplicates cost nothing. A size cap protects the disk.</li>
+    </ul>
+    <div class="meta"><span class="pill">Done when: an image added offline shows on the other device after sync</span></div>
+  </div></div>
+
+  <div class="card phase"><div class="num">P7</div><div>
+    <h3>Databases</h3>
+    <ul>
+      <li>A database is a page whose rows are pages. Properties: text, number, select, date, checkbox.</li>
+      <li>Table view with sort, filter and inline edit. Rows sync as pages, so the server needs no new endpoint.</li>
+      <li>Board and calendar views stay optional.</li>
+    </ul>
+    <div class="meta"><span class="pill">Done when: a task database works as a table with filters</span></div>
+  </div></div>
+
+  <div class="card phase"><div class="num">P8</div><div>
+    <h3>Release</h3>
+    <ul>
+      <li>Multi-stage Dockerfile: build the web app, build Rust with the web app embedded, copy one binary into a small image.</li>
+      <li>Fly.io app with one volume at <code>/data</code>. Litestream replicates the database to object storage.</li>
+      <li>Markdown and JSON export from the app.</li>
+      <li>Tests: Rust integration tests for sync and ownership, Playwright for editor and offline flows.</li>
+    </ul>
+    <div class="meta"><span class="pill">Done when: an invited friend signs in on the live URL and cannot read your notes</span></div>
+  </div></div>
+</section>
+
+<section>
+  <h2>Data model</h2>
+  <pre>create table users (
+  id            integer primary key,
+  email         text not null unique,
+  password_hash text,                 -- null until the invite link is used
+  invite_token  text,
+  created_at    integer not null
+);
+create table sessions (
+  id text primary key, user_id integer not null references users(id), expires_at integer not null
+);
+
+create table pages (
+  id          text primary key,        -- uuid made on the client
+  owner_id    integer not null references users(id),
+  parent_id   text,
+  title       text not null default '',
+  kind        text not null default 'page',  -- 'page' | 'database'
+  position    text not null,                 -- fractional index
+  content     text,                          -- TipTap JSON
+  props       text,                          -- database row values, JSON
+  schema      text,                          -- database columns, JSON
+  daily_date  text,                          -- 'YYYY-MM-DD' for daily notes
+  deleted_at  integer,
+  seq         integer not null               -- server counter, the sync cursor
+);
+create index pages_owner_seq on pages (owner_id, seq);
+create unique index pages_daily on pages (owner_id, daily_date) where daily_date is not null;
+
+create table page_history (page_id text, seq integer, title text, content text);
+create virtual table page_fts using fts5(title, body, content='', tokenize='porter');</pre>
+  <p class="lede">The single SQLite writer makes <code>seq = max(seq) + 1</code> safe inside a transaction. The unique daily index stops two offline devices from leaving two notes for the same day. On sync the later one merges into the earlier one.</p>
+</section>
+
+<section>
+  <h2>Risks</h2>
+  <div class="card risk"><p><b>Same page edited on two offline devices.</b> The last push to arrive wins and the other version sits in history. If it happens often, give that page type a Yjs document later.</p></div>
+  <div class="card risk"><p><b>The server is now yours to keep running.</b> Supabase handled backups, patches and uptime. Litestream and a pinned container image cover the basics, and a restore test belongs in phase 8.</p></div>
+  <div class="card risk"><p><b>One writer.</b> SQLite allows one write at a time. For a handful of users this is far below any limit. It only matters at hundreds of active writers.</p></div>
+  <div class="card risk"><p><b>Password login replaces magic links.</b> Add a rate limit on login and a reset command in the command line tool, because there is no email service to recover an account.</p></div>
+  <div class="card risk"><p><b>Service worker caching.</b> A stale app shell can run against a newer schema. Version the local database and reload when the worker updates.</p></div>
+  <div class="card risk"><p><b>Databases are the largest item.</b> Ship the table view alone first.</p></div>
+</section>
+
+<section>
+  <h2>Open items</h2>
+  <div class="card">
+    <p>Fly.io's free allowance changes over time. Confirm the current terms before phase 8. If it no longer fits, a home machine with a Cloudflare Tunnel keeps the same single-binary design.</p>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

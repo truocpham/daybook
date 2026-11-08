@@ -1,0 +1,6 @@
+node_modules/
+target/
+web/dist/
+data/
+test-results/
+playwright-report/
