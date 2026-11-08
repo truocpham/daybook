@@ -1,29 +1,37 @@
-# Change `app` to a unique name: the site will be https://<app>.fly.dev
-app = "daybook-CHANGE-ME"
-primary_region = "iad"
+# fly.toml app configuration file generated for daybook on 2026-11-08T07:51:33Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'daybook'
+primary_region = 'ams'
 
 [build]
-
 [env]
-  PORT = "8080"
-  DAYBOOK_DATA = "/data"
-  DAYBOOK_PUBLIC_URL = "https://daybook-CHANGE-ME.fly.dev"
-  # LITESTREAM_REPLICA_URL = "s3://your-bucket/daybook"   # plus the secrets in README.md
+  DAYBOOK_DATA = '/data'
+  DAYBOOK_PUBLIC_URL = 'https://daybook-CHANGE-ME.fly.dev'
+  PORT = '8080'
 
-[mounts]
-  source = "daybook_data"
-  destination = "/data"
+[[mounts]]
+  source = 'data'
+  destination = '/data'
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
   [[http_service.checks]]
-    method = "GET"
-    path = "/health"
-    interval = "30s"
-    timeout = "5s"
-    grace_period = "10s"
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/health'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256
