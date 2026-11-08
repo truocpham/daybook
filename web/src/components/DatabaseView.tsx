@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../lib/db";
 import { createPage, trashPage, uid, updatePage } from "../lib/store";
+import Board from "./Board";
 import type { Column, ColumnType, Page } from "../lib/types";
 
 const TYPES: ColumnType[] = ["text", "number", "select", "date", "checkbox"];
@@ -10,6 +11,8 @@ export default function DatabaseView({ page, go }: { page: Page; go: (h: string)
   const rows = useLiveQuery(() => db.pages.filter((p) => p.parent_id === page.id && !p.deleted_at).toArray(), [page.id], [] as Page[]);
   const [sort, setSort] = useState<{ col: string; dir: 1 | -1 } | null>(null);
   const [filter, setFilter] = useState("");
+  const [mode, setMode] = useState<"table" | "board">(() => (localStorage.getItem("dbmode") === "board" ? "board" : "table"));
+  const pick = (m: "table" | "board") => { setMode(m); localStorage.setItem("dbmode", m); };
   const cols: Column[] = page.schema?.columns ?? [];
 
   const setCols = (columns: Column[]) => updatePage(page.id, { schema: { columns } });
@@ -44,9 +47,14 @@ export default function DatabaseView({ page, go }: { page: Page; go: (h: string)
     <div className="dbview">
       <div className="db-tools">
         <input aria-label="Filter rows" placeholder="Filter rows…" value={filter} onChange={(e) => setFilter(e.target.value)} />
+        <div className="seg" role="group" aria-label="View">
+          <button className={mode === "table" ? "on" : ""} aria-pressed={mode === "table"} onClick={() => pick("table")}>Table</button>
+          <button className={mode === "board" ? "on" : ""} aria-pressed={mode === "board"} onClick={() => pick("board")}>Board</button>
+        </div>
         <button onClick={async () => { await createPage({ parent_id: page.id, title: "" }); }}>＋ New row</button>
         <button onClick={addColumn}>＋ Column</button>
       </div>
+      {mode === "board" ? <Board dbId={page.id} rows={view} cols={cols} go={go} /> : (
       <div className="db-scroll">
         <table>
           <thead>
@@ -91,6 +99,7 @@ export default function DatabaseView({ page, go }: { page: Page; go: (h: string)
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }

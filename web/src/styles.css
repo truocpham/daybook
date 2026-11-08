@@ -136,3 +136,19 @@ input{font:inherit;color:inherit}
 }
 @media (prefers-reduced-motion:reduce){.sidebar{transition:none}}
 @media print{.sidebar,.topbar,.crumbs,.grip{display:none}.page{padding:0}}
+
+/* database board */
+.seg{display:flex}.seg button{border:1px solid var(--border);background:none;padding:5px 12px;font-size:14px}
+.seg button:first-child{border-radius:6px 0 0 6px}.seg button:last-child{border-radius:0 6px 6px 0;border-left:0}
+.seg button.on{background:var(--hover);color:var(--accent);font-weight:600}
+.board-tools{display:flex;gap:10px;align-items:center;margin-bottom:10px;font-size:14px}
+.board-tools button{border:1px solid var(--border);background:none;border-radius:6px;padding:4px 10px}
+.board-tools select{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:3px 6px}
+.lanes{display:flex;gap:12px;overflow-x:auto;align-items:flex-start;padding-bottom:8px}
+.lane{flex:0 0 240px;background:var(--side);border:1px solid var(--border);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:8px;min-height:120px}
+.lane.over{outline:2px solid var(--accent);outline-offset:-2px}
+.lane h3{margin:0;font-size:13px;color:var(--muted);font-weight:600}.lane h3 small{margin-left:4px}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px;cursor:grab;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.card:hover{border-color:var(--accent)}.card small{color:var(--muted)}
+.lane-add{background:none;border:0;color:var(--muted);text-align:left;padding:2px 4px}
+.lane-add:hover{color:var(--fg)}

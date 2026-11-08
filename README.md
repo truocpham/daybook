@@ -41,7 +41,7 @@ Development with hot reload: run the server as above, then `cd web && npm run de
 | Reorder blocks | Hover a block and drag the `⋮⋮` handle |
 | Reorder or nest pages | Drag a page in the sidebar. Drop on the top or bottom edge to reorder, in the middle to nest |
 | Images and files | Paste or drop an image, or use `/image` and `/file` (10 MB limit) |
-| Database | **New database** in the sidebar. Rows are pages. Click a column title to sort |
+| Database | **New database** in the sidebar. Rows are pages. Click a column title to sort. Switch to **Board** to group cards by a select column and drag them between groups |
 | Back up | **Backup** downloads JSON. **Restore** loads it. A page can also be exported as Markdown |
 
 ## Accounts
@@ -92,12 +92,12 @@ Uploaded images live in `/data/files` and are not covered by Litestream; back th
 ```bash
 cd server && cargo test        # sync, isolation, merge, history
 cd web && npm test             # helpers and Markdown export
-docker build -t daybook:dev . && sh e2e/run.sh   # 11 browser tests (Playwright in Docker): sign-in, editor, two devices,
-                                                 # offline sync, account isolation, images, databases, PWA offline start, phone layout, drag and drop
+docker build -t daybook:dev . && sh e2e/run.sh   # 12 browser tests (Playwright in Docker): sign-in, editor, two devices,
+                                                 # offline sync, account isolation, images, databases, PWA offline start, phone layout, drag and drop, database board
 ```
 
 ## Not built yet
 
-- Board and calendar views for databases (table view only).
+- Calendar view for databases (table and board views exist).
 - Live collaboration and shared pages.
 - Desktop wrapper (the installed web app covers desktop).

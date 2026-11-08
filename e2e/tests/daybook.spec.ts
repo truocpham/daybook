@@ -213,3 +213,27 @@ test("drag a page onto another page in the sidebar", async () => {
   await expect(tree.getByLabel("Collapse")).toBeVisible();
   await expect(tree.getByText("Child page")).toBeVisible();
 });
+
+test("database board: drag a card to another group", async () => {
+  const { page } = devA1;
+  await page.getByRole("button", { name: "▦ New database" }).click();
+  await page.getByLabel("Page title").fill("Sprint");
+  for (const [i, [name, status]] of [["Write docs", "todo"], ["Ship it", "done"]].entries()) {
+    await page.getByRole("button", { name: "＋ New row" }).click();
+    await expect(page.locator("tbody tr")).toHaveCount(i + 1);
+    const row = page.locator("tbody tr").last();
+    await row.getByLabel("Row name").fill(name);
+    await row.getByLabel("Status", { exact: true }).fill(status);
+  }
+  await page.getByRole("button", { name: "Board", exact: true }).click();
+  const todo = page.getByRole("region", { name: "todo" });
+  const done = page.getByRole("region", { name: "done" });
+  await expect(todo.getByText("Write docs")).toBeVisible();
+  await expect(done.getByText("Ship it")).toBeVisible();
+  await todo.getByText("Write docs").dragTo(done);
+  await expect(done.getByText("Write docs")).toBeVisible();
+  await expect(todo.getByText("Write docs")).toHaveCount(0);
+  // the change is stored on the row, so the table shows it too
+  await page.getByRole("button", { name: "Table", exact: true }).click();
+  await expect(page.locator("tbody tr").filter({ has: page.locator('input[value="Write docs"]') }).getByLabel("Status", { exact: true })).toHaveValue("done");
+});
