@@ -6,12 +6,9 @@ A Notion-style daily notes app. It works offline, syncs across your devices, and
 - **Server** (`server/`): one Rust binary (axum) with one SQLite file. It serves the web app and the API.
 - **Accounts**: invite-only. There is no sign-up page.
 
-```
-Browser (installed web app)                      One container
-  React + TipTap                                   daybook (Rust)
-  IndexedDB: pages, images        POST /api/sync    SQLite (WAL) + files/ on /data
-  service worker: offline shell   ───────────────▶  Litestream → object storage (optional)
-```
+![Daybook architecture: the installed web app syncs through three endpoints to one Rust container with SQLite, backed up by Litestream](docs/architecture.svg)
+
+Source: `docs/gen-diagram.js` (made with the diagram-design skill; run `node docs/gen-diagram.js` to regenerate).
 
 ## Run it locally
 
