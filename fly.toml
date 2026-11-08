@@ -1,14 +1,14 @@
 # Fly.io configuration for Daybook (app name and region come from `fly launch`).
-# The site is https://daybook.fly.dev. Builds use the Dockerfile in this folder.
+# The site is https://daybook-8cmw-q.fly.dev. Builds use the Dockerfile in this folder.
 
-app = 'daybook'
+app = 'daybook-8cmw-q'
 primary_region = 'ams'
 
 [build]
 
 [env]
   DAYBOOK_DATA = '/data'
-  DAYBOOK_PUBLIC_URL = 'https://daybook.fly.dev'
+  DAYBOOK_PUBLIC_URL = 'https://daybook-8cmw-q.fly.dev'
   PORT = '8080'
   # LITESTREAM_REPLICA_URL = 's3://your-bucket/daybook'   # plus the secrets in README.md
 
